@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Options;
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -16,6 +17,10 @@ public static class ServiceCollectionExtensions
         }
 
         services.TryAddSingleton<ILinkEnricher, LinkEnricher>();
+        _ = services.AddHttpContextAccessor();
+        services.TryAddSingleton<LinksJsonTypeInfoModifier>();
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<IConfigureOptions<Microsoft.AspNetCore.Http.Json.JsonOptions>, HateoasJsonOptionsSetup>());
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<IConfigureOptions<Microsoft.AspNetCore.Mvc.JsonOptions>, HateoasJsonOptionsSetup>());
         return new HateoasBuilder(services);
     }
 }

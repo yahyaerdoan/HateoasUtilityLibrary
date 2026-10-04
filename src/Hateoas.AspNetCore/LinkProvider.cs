@@ -14,7 +14,7 @@ public interface ILinkProvider
 /// forget them. Implementations must be stateless; they are registered as singletons.
 /// </summary>
 public abstract class LinkProvider<TResource> : ILinkProvider
-    where TResource : ILinkedResource
+    where TResource : class
 {
     public Type ResourceType => typeof(TResource);
 
