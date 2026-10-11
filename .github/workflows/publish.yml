@@ -5,12 +5,14 @@ on:
     branches: [master, beta]
     paths:
       - 'src/**'
+  workflow_dispatch:
 
 jobs:
   publish:
     runs-on: windows-latest
     permissions:
       id-token: write
+      contents: read
 
     steps:
       - name: Checkout
