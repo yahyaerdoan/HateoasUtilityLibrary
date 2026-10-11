@@ -68,7 +68,7 @@ jobs:
         run: dotnet build HateoasUtilityLibrary.slnx --no-restore --configuration Release -p:Version=${{ steps.version.outputs.version }} -p:IsPublishBuild=true
 
       - name: Test
-        run: dotnet test test/Hateoas.Tests/Hateoas.Tests.csproj --no-build --configuration Release
+        run: dotnet test --project test/Hateoas.Tests/Hateoas.Tests.csproj --no-build --configuration Release
 
       - name: Pack
         run: dotnet pack HateoasUtilityLibrary.slnx --no-build --configuration Release -p:Version=${{ steps.version.outputs.version }} -p:IsPublishBuild=true --output ./nupkgs

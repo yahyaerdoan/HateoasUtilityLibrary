@@ -33,7 +33,7 @@ jobs:
       - name: Test
         # Hateoas.Tests only targets net10.0 (src libraries are multi-targeted net8/9/10, tests aren't) - single run, no -f loop needed.
         # --report-trx is the MTP-native flag (global.json opts dotnet test into MTP mode); needs Microsoft.Testing.Extensions.TrxReport referenced by the test project.
-        run: dotnet test test/Hateoas.Tests/Hateoas.Tests.csproj --no-build --configuration Release --report-trx --report-trx-filename test-results.net10.0.trx --results-directory test/Hateoas.Tests/TestResults
+        run: dotnet test --project test/Hateoas.Tests/Hateoas.Tests.csproj --no-build --configuration Release --report-trx --report-trx-filename test-results.net10.0.trx --results-directory test/Hateoas.Tests/TestResults
 
       - name: Publish test results
         if: always()
