@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Hateoas.AspNetCore/Hateoas.AspNetCore.csproj" />
+    <Project Path="src/Hateoas/Hateoas.csproj" />
+  </Folder>
+  <Folder Name="/test/">
+    <Project Path="test/Hateoas.Tests/Hateoas.Tests.csproj" />
+  </Folder>
+</Solution>

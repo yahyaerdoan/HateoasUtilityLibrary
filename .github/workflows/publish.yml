@@ -1,0 +1,93 @@
+name: publish
+
+on:
+  push:
+    branches: [master, beta]
+    paths:
+      - 'src/**'
+      - '.github/workflows/publish.yml'
+      - 'global.json'
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: windows-latest
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            9.0.x
+            10.0.x
+
+      - name: Resolve package version
+        id: version
+        shell: pwsh
+        run: |
+          # major.minor comes from <Version> in Hateoas.csproj (the core package - Hateoas.AspNetCore is
+          # stamped the same version via -p:Version so the pair stays in lockstep). Patch is never hand-edited:
+          # it's the highest already-published stable patch for that major.minor (queried from NuGet.org) plus
+          # one, so it can only go up and master/beta always agree on the version they're targeting. beta
+          # appends -beta.<run_number> to preview that same version (2.1.0-beta.5 < 2.1.0).
+          $csprojVersion = (dotnet msbuild src/Hateoas/Hateoas.csproj -getProperty:Version).Trim()
+          $majorMinor = ($csprojVersion -split '\.')[0..1] -join '.'
+          $packageId = (dotnet msbuild src/Hateoas/Hateoas.csproj -getProperty:PackageId).Trim().ToLowerInvariant()
+
+          try {
+            $index = Invoke-RestMethod -Uri "https://api.nuget.org/v3-flatcontainer/$packageId/index.json"
+          } catch {
+            $index = $null
+          }
+
+          $publishedPatches = @()
+          if ($index) {
+            $publishedPatches = $index.versions |
+              Where-Object { $_ -notmatch '-' -and $_ -like "$majorMinor.*" } |
+              ForEach-Object { [int]($_.Substring($majorMinor.Length + 1)) }
+          }
+          $nextPatch = if ($publishedPatches.Count -gt 0) { ($publishedPatches | Measure-Object -Maximum).Maximum + 1 } else { 0 }
+
+          $version = "$majorMinor.$nextPatch"
+          if ("${{ github.ref_name }}" -eq "beta") {
+            $version = "$version-beta.${{ github.run_number }}"
+          }
+          "version=$version" >> $env:GITHUB_OUTPUT
+
+      - name: Restore
+        run: dotnet restore HateoasUtilityLibrary.slnx -p:IsPublishBuild=true
+
+      - name: Build
+        run: dotnet build HateoasUtilityLibrary.slnx --no-restore --configuration Release -p:Version=${{ steps.version.outputs.version }} -p:IsPublishBuild=true
+
+      - name: Test
+        run: dotnet test --project test/Hateoas.Tests/Hateoas.Tests.csproj --no-build --configuration Release
+
+      - name: Pack
+        run: dotnet pack HateoasUtilityLibrary.slnx --no-build --configuration Release -p:Version=${{ steps.version.outputs.version }} -p:IsPublishBuild=true --output ./nupkgs
+
+      - name: NuGet login (OIDC -> temp API key)
+        uses: NuGet/login@v1
+        id: login
+        with:
+          user: ${{ secrets.NUGET_USER }}
+
+      - name: Push to NuGet.org
+        shell: pwsh
+        run: |
+          $packages = Get-ChildItem -Path ./nupkgs -Filter *.nupkg
+          if (-not $packages) {
+            throw "No .nupkg files found in ./nupkgs"
+          }
+          foreach ($package in $packages) {
+            dotnet nuget push $package.FullName --api-key ${{ steps.login.outputs.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+          }

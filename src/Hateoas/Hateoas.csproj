@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
+    <!-- "Hateoas" is squatted on nuget.org by an unrelated, long-deleted 2018 package (id reservations never free up) - using Hateoas.Hal instead. -->
+    <PackageId>Hateoas.Hal</PackageId>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Title>Hateoas</Title>
+    <Version>2.1.0</Version>
+    <Product>Hateoas</Product>
+    <Description>Framework-agnostic building blocks for HAL hypermedia (HATEOAS): Link, a LinkCollection that serializes as HAL "_links" with CURIEs, IANA LinkRelations, and LinkedResponse / LinkedRecord base types whose "_links" are omitted until a link is added. Pair with Hateoas.AspNetCore.</Description>
+    <PackageTags>Hateoas HAL Hypermedia REST RichardsonMaturityModel Links</PackageTags>
+  </PropertyGroup>
+
+</Project>
