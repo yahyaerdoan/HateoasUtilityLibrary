@@ -2,7 +2,8 @@
 
   <PropertyGroup>
     <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
-    <PackageId>Hateoas</PackageId>
+    <!-- "Hateoas" is squatted on nuget.org by an unrelated, long-deleted 2018 package (id reservations never free up) - using Hateoas.Hal instead. -->
+    <PackageId>Hateoas.Hal</PackageId>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Title>Hateoas</Title>
     <Version>2.1.0</Version>
