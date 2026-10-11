@@ -1,0 +1,42 @@
+name: build
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  build-and-test:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            9.0.x
+            10.0.x
+
+      - name: Restore
+        run: dotnet restore HateoasUtilityLibrary.slnx
+
+      - name: Build
+        run: dotnet build HateoasUtilityLibrary.slnx --no-restore --configuration Release
+
+      - name: Test
+        # Hateoas.Tests only targets net10.0 (src libraries are multi-targeted net8/9/10, tests aren't) - single run, no -f loop needed.
+        run: dotnet test test/Hateoas.Tests/Hateoas.Tests.csproj --no-build --configuration Release --results-directory test/Hateoas.Tests/TestResults --report-xunit-trx --report-xunit-trx-filename test-results.net10.0.trx
+
+      - name: Publish test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: test/Hateoas.Tests/TestResults/*.trx
