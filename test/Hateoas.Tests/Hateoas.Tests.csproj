@@ -5,6 +5,7 @@
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
     <OutputType>Exe</OutputType>
+    <InterceptorsNamespaces>$(InterceptorsNamespaces);Microsoft.AspNetCore.OpenApi.Generated</InterceptorsNamespaces>
   </PropertyGroup>
 
   <ItemGroup>
@@ -26,6 +27,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\Hateoas.AspNetCore.OpenApi\Hateoas.AspNetCore.OpenApi.csproj" />
     <ProjectReference Include="..\..\src\Hateoas.AspNetCore\Hateoas.AspNetCore.csproj" />
     <ProjectReference Include="..\..\src\Hateoas\Hateoas.csproj" />
   </ItemGroup>
