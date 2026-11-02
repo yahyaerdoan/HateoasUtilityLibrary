@@ -6,6 +6,7 @@ HAL hypermedia ("_links") for ASP.NET Core Minimal APIs, applied from one place 
 | --- | --- |
 | `Hateoas` | `Link`, `LinkCollection` (HAL "_links" with CURIEs), `LinkRelations` (IANA), optional `LinkedResponse` / `LinkedRecord` base types |
 | `Hateoas.AspNetCore` | `LinkProvider<T>`, `HateoasLinkBuilder`, the endpoint filter, `AddHateoas()`, `WithHateoas()` / `WithCreatedLocation()` / `WithoutHateoas()` |
+| `Hateoas.AspNetCore.OpenApi` | `AddHateoasDocumentation()`: documents `"_links"` in Microsoft.AspNetCore.OpenApi documents (.NET 10) |
 
 ## Setup
 
@@ -45,6 +46,15 @@ public sealed class OrderLinks : LinkProvider<OrderResponse>
             .Self("GetOrderDetail", new { id = order.Id })
             .AddCustomIf(order.PaymentStatus == "Pending", "pay", "ResumeOrderPayment", HttpMethods.Get, new { id = order.Id });
 }
+```
+
+## OpenAPI
+
+`"_links"` is written by a custom converter, so the schema generator sees an empty object. `Hateoas.AspNetCore.OpenApi` (.NET 10)
+documents it as written: links by relation (`href` required; `method`, `title`, `templated` optional) plus the `curies` array.
+
+```csharp
+builder.Services.AddOpenApi(options => options.AddHateoasDocumentation());
 ```
 
 ## Tests
